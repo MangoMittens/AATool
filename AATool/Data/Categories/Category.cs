@@ -47,7 +47,12 @@ namespace AATool.Data.Categories
         {
             if (Version.TryParse(version, out Version number))
             {
-                if (number > Version.Parse("1.20.4") && number < Version.Parse("1.21"))
+                if (number >= Version.Parse("26.1") && number < Version.Parse("26.2"))
+                {
+                    //handle sub-versioning of 26.1 (26.1.1, 26.1.2, etc.)
+                    version = "26.1";
+                }
+                else if (number > Version.Parse("1.20.4") && number < Version.Parse("1.21"))
                 {
                     //handle sub-versioning of 1.20 due to wolves and armadillos
                     version = "1.20.5";
