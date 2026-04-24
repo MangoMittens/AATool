@@ -366,14 +366,23 @@ namespace AATool
         {
             if (!string.IsNullOrEmpty(World.FullName))
             {
-                string advancements = Path.Combine(World.FullName, "advancements\\");
+                //MC 26.1+ moved player data into a "players" subdirectory
+                string playersDir = Path.Combine(World.FullName, "players");
+                bool useNewLayout = Directory.Exists(Path.Combine(playersDir, "advancements"))
+                    || Directory.Exists(Path.Combine(playersDir, "stats"));
+
+                string advancements = useNewLayout
+                    ? Path.Combine(playersDir, "advancements\\")
+                    : Path.Combine(World.FullName, "advancements\\");
                 if (!AdvancementsWatcher.EnableRaisingEvents && Directory.Exists(advancements))
                 {
                     AdvancementsWatcher.Path = advancements;
                     AdvancementsWatcher.EnableRaisingEvents = true;
                 }
 
-                string statistics = Path.Combine(World.FullName, "stats\\");
+                string statistics = useNewLayout
+                    ? Path.Combine(playersDir, "stats\\")
+                    : Path.Combine(World.FullName, "stats\\");
                 if (!StatisticsWatcher.EnableRaisingEvents && Directory.Exists(statistics))
                 {
                     StatisticsWatcher.Path = statistics;

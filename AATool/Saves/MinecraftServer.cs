@@ -252,14 +252,23 @@ namespace AATool.Saves
 
         private static bool TryDownloadProgress(SftpClient sftp)
         {
-            //download advancement jsons
+            //download advancement jsons (MC 26.1+ uses players/advancements)
             SetState(SyncState.Advancements);
-            if (!TryDownloadFolder(sftp, "advancements"))
-                return false;
+            if (!TryDownloadFolder(sftp, "players/advancements"))
+            {
+                //fall back to pre-26.1 layout
+                if (!TryDownloadFolder(sftp, "advancements"))
+                    return false;
+            }
 
-            //download statistic jsons
+            //download statistic jsons (MC 26.1+ uses players/stats)
             SetState(SyncState.Statistics);
-            return TryDownloadFolder(sftp, "stats");
+            if (!TryDownloadFolder(sftp, "players/stats"))
+            {
+                //fall back to pre-26.1 layout
+                return TryDownloadFolder(sftp, "stats");
+            }
+            return true;
         }
 
         private static bool TryGetProperty(string[] properties, string key, out string value)

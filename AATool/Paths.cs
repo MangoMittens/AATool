@@ -155,7 +155,9 @@ namespace AATool
             {
                 return File.Exists(Path.Combine(folder.FullName, "level.dat"))
                     || Directory.Exists(Path.Combine(folder.FullName, "advancements"))
-                    || Directory.Exists(Path.Combine(folder.FullName, "stats"));
+                    || Directory.Exists(Path.Combine(folder.FullName, "stats"))
+                    || Directory.Exists(Path.Combine(folder.FullName, "players", "advancements"))
+                    || Directory.Exists(Path.Combine(folder.FullName, "players", "stats"));
             }
 
             public static DirectoryInfo MostRecentlyWritten(DirectoryInfo a, DirectoryInfo b)

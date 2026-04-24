@@ -76,8 +76,17 @@ namespace AATool.Saves
 
                 this.CurrentFolder = worldFolder;
                 this.PathChanged = true;
-                string advancementsFolder = Path.Combine(this.CurrentFolder.FullName, "advancements");
-                string statisticsFolder = Path.Combine(this.CurrentFolder.FullName, "stats");
+                //MC 26.1+ moved player data into a "players" subdirectory
+                string playersDir = Path.Combine(this.CurrentFolder.FullName, "players");
+                bool useNewLayout = Directory.Exists(Path.Combine(playersDir, "advancements"))
+                    || Directory.Exists(Path.Combine(playersDir, "stats"));
+
+                string advancementsFolder = useNewLayout
+                    ? Path.Combine(playersDir, "advancements")
+                    : Path.Combine(this.CurrentFolder.FullName, "advancements");
+                string statisticsFolder = useNewLayout
+                    ? Path.Combine(playersDir, "stats")
+                    : Path.Combine(this.CurrentFolder.FullName, "stats");
 
                 //world changed
                 this.Advancements.SetPath(advancementsFolder);
