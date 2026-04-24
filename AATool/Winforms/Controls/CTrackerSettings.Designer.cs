@@ -52,6 +52,8 @@ namespace AATool.Winforms.Controls
             this.remoteGroup = new System.Windows.Forms.GroupBox();
             this.label15 = new System.Windows.Forms.Label();
             this.sftpType = new System.Windows.Forms.ComboBox();
+            this.labelProtocol = new System.Windows.Forms.Label();
+            this.sftpProtocol = new System.Windows.Forms.ComboBox();
             this.label14 = new System.Windows.Forms.Label();
             this.sftpAutoSaveMinutes = new System.Windows.Forms.NumericUpDown();
             this.sftpValidate = new System.Windows.Forms.Button();
@@ -323,6 +325,8 @@ namespace AATool.Winforms.Controls
             // 
             // remoteGroup
             // 
+            this.remoteGroup.Controls.Add(this.labelProtocol);
+            this.remoteGroup.Controls.Add(this.sftpProtocol);
             this.remoteGroup.Controls.Add(this.label15);
             this.remoteGroup.Controls.Add(this.sftpType);
             this.remoteGroup.Controls.Add(this.label14);
@@ -371,7 +375,30 @@ namespace AATool.Winforms.Controls
             this.sftpType.Size = new System.Drawing.Size(96, 21);
             this.sftpType.TabIndex = 74;
             this.sftpType.SelectedIndexChanged += new System.EventHandler(this.OnIndexChanged);
-            // 
+            //
+            // labelProtocol
+            //
+            this.labelProtocol.AutoSize = true;
+            this.labelProtocol.Location = new System.Drawing.Point(280, 113);
+            this.labelProtocol.Margin = new System.Windows.Forms.Padding(3, 6, 3, 0);
+            this.labelProtocol.Name = "labelProtocol";
+            this.labelProtocol.Size = new System.Drawing.Size(52, 13);
+            this.labelProtocol.TabIndex = 77;
+            this.labelProtocol.Text = "Protocol:";
+            //
+            // sftpProtocol
+            //
+            this.sftpProtocol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.sftpProtocol.FormattingEnabled = true;
+            this.sftpProtocol.Items.AddRange(new object[] {
+            "SFTP",
+            "FTP"});
+            this.sftpProtocol.Location = new System.Drawing.Point(283, 129);
+            this.sftpProtocol.Name = "sftpProtocol";
+            this.sftpProtocol.Size = new System.Drawing.Size(96, 21);
+            this.sftpProtocol.TabIndex = 76;
+            this.sftpProtocol.SelectedIndexChanged += new System.EventHandler(this.OnIndexChanged);
+            //
             // label14
             // 
             this.label14.AutoSize = true;
@@ -809,6 +836,8 @@ namespace AATool.Winforms.Controls
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.ComboBox sftpType;
+        private System.Windows.Forms.Label labelProtocol;
+        private System.Windows.Forms.ComboBox sftpProtocol;
         private System.Windows.Forms.RadioButton manualChecklist;
     }
 }

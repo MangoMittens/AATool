@@ -55,6 +55,7 @@ namespace AATool.Winforms.Controls
             this.sftpRoot.Text = Config.Sftp.ServerRoot;
             this.sftpAutoSaveMinutes.Value = Config.Sftp.AutoSaveMinutes;
             this.sftpType.Text = Config.Sftp.Linux ? "Linux" : "Windows";
+            this.sftpProtocol.Text = Config.Sftp.UseFtp ? "FTP" : "SFTP";
 
             this.UpdateSaveGroupPanel();
             this.UpdateFilterPanel();
@@ -115,6 +116,7 @@ namespace AATool.Winforms.Controls
                 Config.Sftp.ServerRoot.Set(this.sftpRoot.Text);
                 Config.Sftp.AutoSaveMinutes.Set((int)Math.Max(1, this.sftpAutoSaveMinutes.Value));
                 Config.Sftp.Linux.Set(this.sftpType.Text == "Linux");
+                Config.Sftp.UseFtp.Set(this.sftpProtocol.Text == "FTP");
                 Config.Sftp.TrySave();
             }
         }
