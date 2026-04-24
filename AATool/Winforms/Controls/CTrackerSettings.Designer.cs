@@ -333,7 +333,6 @@ namespace AATool.Winforms.Controls
             this.remoteGroup.Controls.Add(this.sftpAutoSaveMinutes);
             this.remoteGroup.Controls.Add(this.sftpValidate);
             this.remoteGroup.Controls.Add(this.label13);
-            this.remoteGroup.Controls.Add(this.sftpCompatibility);
             this.remoteGroup.Controls.Add(this.label7);
             this.remoteGroup.Controls.Add(this.label5);
             this.remoteGroup.Controls.Add(this.sftpRoot);
@@ -399,6 +398,8 @@ namespace AATool.Winforms.Controls
             this.sftpProtocol.TabIndex = 76;
             this.sftpProtocol.SelectedIndexChanged += new System.EventHandler(this.OnIndexChanged);
             //
+            // NOTE: sftpCompatibility removed — link was dead
+            //
             // label14
             // 
             this.label14.AutoSize = true;
@@ -435,7 +436,7 @@ namespace AATool.Winforms.Controls
             // sftpValidate
             // 
             this.sftpValidate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.sftpValidate.Location = new System.Drawing.Point(300, 136);
+            this.sftpValidate.Location = new System.Drawing.Point(300, 162);
             this.sftpValidate.Name = "sftpValidate";
             this.sftpValidate.Size = new System.Drawing.Size(104, 42);
             this.sftpValidate.TabIndex = 1;
@@ -454,17 +455,7 @@ namespace AATool.Winforms.Controls
             this.label13.TabIndex = 71;
             this.label13.Text = "🛈 If you\'re connecting to a survival server and would like to only see your own " +
     "advancements, set Player Filtering to \"Solo\"";
-            // 
-            // sftpCompatibility
-            // 
-            this.sftpCompatibility.Location = new System.Drawing.Point(306, 191);
-            this.sftpCompatibility.Name = "sftpCompatibility";
-            this.sftpCompatibility.Size = new System.Drawing.Size(98, 15);
-            this.sftpCompatibility.TabIndex = 62;
-            this.sftpCompatibility.TabStop = true;
-            this.sftpCompatibility.Text = "SFTP compatibility";
-            this.sftpCompatibility.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
+            //
             // label7
             // 
             this.label7.AutoSize = true;

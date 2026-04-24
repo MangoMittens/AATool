@@ -273,13 +273,6 @@ namespace AATool.Winforms.Controls
 
         private void OnLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (sender == this.sftpCompatibility)
-            {
-                string title = "SFTP Compatibility Information";
-                string body = "Remote tracking over SFTP has only been officially tested on DedicatedMC, " +
-                    "although other hosts should work as well.";
-                MessageBox.Show(this, body, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
         }
 
         private void OnTimerTick(object sender, EventArgs e)
