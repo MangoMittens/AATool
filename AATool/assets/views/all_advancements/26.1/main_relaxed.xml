@@ -52,14 +52,16 @@
 				<objective_frame complex="GoldBlocks"/>
 				<objective_frame complex="HeavyCore"/>
 			</flow_panel>
--
+
             <!-- info panel -->
-            <leaderboard name="Leaderboard" category="All Advancements" version="1.21.6" row="0" col="7" rowspan="2" rows="7"/>
+            <leaderboard name="Leaderboard" category="All Advancements" version="26.1" row="0" col="7" rowspan="2" rows="7"/>
             <potion_group name="Potion Recipes" row="0" col="7" rowspan="2" padding="8,0,6,0"/>
         </grid>
 
         <!-- advancements with subcriteria -->
         <flow_panel row="1" col="1" colspan="2">
+            <criteria_group width="6 * 68" advancement="minecraft:adventure/adventuring_time" cell_width="130"/>
+            <criteria_group width="4.5 * 68" advancement="minecraft:adventure/kill_all_mobs" cell_width="108" spacers="3@12,3@29,"/>
             <criteria_group width="5 * 68" advancement="minecraft:husbandry/balanced_diet" cell_width="112" spacers="4@11,4@27,"/>
             <criteria_group width="2.5 * 68" advancement="minecraft:husbandry/bred_all_animals" cell_width="88" spacers="4@11"/>
             <criteria_group width="1.5 * 68" advancement="minecraft:husbandry/complete_catalogue"/>
