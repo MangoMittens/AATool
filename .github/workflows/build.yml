@@ -24,8 +24,17 @@ jobs:
     - name: Build
       run: msbuild AATool.sln /p:Configuration=Release /p:Platform="Any CPU"
 
+    - name: Find output
+      run: |
+        dir /s /b *.exe 2>nul
+        dir /s /b AATool.exe 2>nul
+      shell: cmd
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: AATool-26.1
-        path: AATool/compiled/release/
+        path: |
+          compiled/release/
+          AATool/compiled/release/
+        if-no-files-found: warn
