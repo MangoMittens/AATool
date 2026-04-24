@@ -31,8 +31,6 @@
 
         <!-- advancements with subcriteria -->
         <flow_panel row="1" col="1" colspan="2" drawmode="all">
-            <criteria_group width="455" advancement="minecraft:adventure/adventuring_time" cell_width="110"/>
-            <criteria_group width="276" advancement="minecraft:adventure/kill_all_mobs"/>
             <criteria_group width="306" advancement="minecraft:husbandry/balanced_diet" cell_width="100"/>
             <criteria_group width="171" advancement="minecraft:husbandry/bred_all_animals"/>
             <criteria_group width="85" advancement="minecraft:husbandry/complete_catalogue"/>

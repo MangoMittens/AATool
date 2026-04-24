@@ -60,8 +60,6 @@
 
         <!-- advancements with subcriteria -->
         <flow_panel row="1" col="1" colspan="2">
-            <criteria_group width="6 * 68" advancement="minecraft:adventure/adventuring_time" cell_width="130"/>
-            <criteria_group width="4.5 * 68" advancement="minecraft:adventure/kill_all_mobs" cell_width="108" spacers="3@12,3@29,"/>
             <criteria_group width="5 * 68" advancement="minecraft:husbandry/balanced_diet" cell_width="112" spacers="4@11,4@27,"/>
             <criteria_group width="2.5 * 68" advancement="minecraft:husbandry/bred_all_animals" cell_width="88" spacers="4@11"/>
             <criteria_group width="1.5 * 68" advancement="minecraft:husbandry/complete_catalogue"/>

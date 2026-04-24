@@ -120,10 +120,6 @@
         <!-- advancements with subcriteria -->
         <flow_panel row="1" col="1" colspan="2" padding_bottom="6" border_thickness="6">
             <panel width="6" border_thickness="6" inner_corners="false"/>
-            <criteria_group width="516" cell_width="130" advancement="minecraft:adventure/adventuring_time"/>
-            <panel width="6" border_thickness="6" inner_corners="false"/>
-            <criteria_group width="322" cell_width="118" advancement="minecraft:adventure/kill_all_mobs"/>
-            <panel width="6" border_thickness="6" inner_corners="false"/>
             <criteria_group width="187" cell_width="100" advancement="minecraft:husbandry/bred_all_animals"/>
             <panel width="6" border_thickness="6" inner_corners="false"/>
             <criteria_group width="96" cell_width="80"  advancement="minecraft:husbandry/complete_catalogue"/>
