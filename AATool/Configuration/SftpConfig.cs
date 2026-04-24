@@ -15,6 +15,7 @@ namespace AATool.Configuration
             [JsonProperty] public readonly Setting<int> Port = new (22);
             [JsonProperty] public readonly Setting<int> AutoSaveMinutes = new (5);
             [JsonProperty] public readonly Setting<bool> Linux = new (false);
+            [JsonProperty] public readonly Setting<bool> UseFtp = new (false);
 
             [JsonProperty] public readonly Setting<string> ServerRoot = new (string.Empty);
 

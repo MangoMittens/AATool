@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AATool.Configuration;
 using AATool.Net;
+using FluentFTP;
 using Microsoft.Xna.Framework;
 using Renci.SshNet;
 using Renci.SshNet.Common;
@@ -35,7 +36,7 @@ namespace AATool.Saves
         private static bool LinuxMode;
 
         public static double SaveInterval => (Config.Sftp.AutoSaveMinutes * 60) + 5;
-        public static bool CredentialsValidated => Credentials is not null;
+        public static bool CredentialsValidated => Credentials is not null || Config.Sftp.UseFtp;
         public static bool LastSyncFailed => LastError is not null;
         public static bool IsDownloading => State is SyncState.Advancements or SyncState.Statistics;
         public static bool IsEnabled => Config.Tracking.UseSftp;
@@ -49,7 +50,7 @@ namespace AATool.Saves
             : default;
 
         public static string HostAwarePath(params string[] paths) => LinuxMode
-            ? Path.Combine(paths).Replace(@"\", "/") 
+            ? Path.Combine(paths).Replace(@"\", "/")
             : Path.Combine(paths).Replace("/", @"\");
 
         public static void Update(Time time)
@@ -59,7 +60,7 @@ namespace AATool.Saves
                 //invalid login credentials, don't try reconnecting
                 return;
             }
-            
+
             RefreshTimer.Update(time);
             if (IsEnabled && RefreshTimer.IsExpired)
                 Sync();
@@ -76,8 +77,14 @@ namespace AATool.Saves
 
             SetState(SyncState.Connecting);
 
-            //attempt to sync in the background
-            Task.Run(() => 
+            if (Config.Sftp.UseFtp)
+            {
+                SyncFtp();
+                return;
+            }
+
+            //attempt to sync in the background via SFTP
+            Task.Run(() =>
             {
                 SftpClient sftp = null;
                 double remaining = 0;
@@ -136,6 +143,8 @@ namespace AATool.Saves
 
         public static string GetLongStatusText()
         {
+            string protocol = Config.Sftp.UseFtp ? "FTP" : "SFTP";
+
             if (State is SyncState.Connecting)
                 return "Connecting to Minecraft server...";
 
@@ -147,7 +156,7 @@ namespace AATool.Saves
 
                     //waiting
                     if (LastError is IOException)
-                        return $"SFTP couldn't write to local files! Retrying in {timeLeft}";
+                        return $"{protocol} couldn't write to local files! Retrying in {timeLeft}";
 
                     if (LastError is SocketException)
                         return $"Couldn't reach dedicated Minecraft server. Retrying in {timeLeft}";
@@ -156,7 +165,7 @@ namespace AATool.Saves
                         return $"{LastError.Message} Retrying in {timeLeft}";
 
                     return LastSyncFailed
-                        ? $"SFTP Error: {LastError.Message} Retrying in {timeLeft}" 
+                        ? $"{protocol} Error: {LastError.Message} Retrying in {timeLeft}"
                         : $"Synced! Refreshing in {timeLeft}";
                 }
                 else
@@ -174,12 +183,12 @@ namespace AATool.Saves
             }
 
             if (LastError is SshAuthenticationException)
-                return "SFTP login refused by Minecraft server.";
+                return $"{protocol} login refused by Minecraft server.";
 
             if (LastError is ArgumentException)
-                return "Invalid SFTP Login.";
+                return $"Invalid {protocol} Login.";
 
-            return $"SFTP not running: Retrying in {Tracker.GetEstimateString(GetNextRefresh())}";
+            return $"{protocol} not running: Retrying in {Tracker.GetEstimateString(GetNextRefresh())}";
         }
 
         public static string GetShortStatusText()
@@ -188,7 +197,7 @@ namespace AATool.Saves
             {
                 return CredentialsValidated
                     ? $"Refreshing in {Tracker.GetEstimateString(GetNextRefresh()).Replace(" ", "\0")}"
-                    : "SFTP Offline";
+                    : (Config.Sftp.UseFtp ? "FTP Offline" : "SFTP Offline");
             }
             else
             {
@@ -213,7 +222,7 @@ namespace AATool.Saves
                     new PasswordAuthenticationMethod(Config.Sftp.Username, Config.Sftp.Password)
                 }) { Timeout = TimeSpan.FromSeconds(5) };
             }
-            catch (ArgumentException exception) 
+            catch (ArgumentException exception)
             {
                 LastError = exception;
             }
@@ -332,7 +341,7 @@ namespace AATool.Saves
         {
             SetState(SyncState.LastAutoSave);
             string remotePath = HostAwarePath(Config.Sftp.ServerRoot, WorldName, "level.dat");
-            lastWorldSave = default;   
+            lastWorldSave = default;
             try
             {
                 lastWorldSave = sftp.GetLastWriteTimeUtc(remotePath);
@@ -394,7 +403,7 @@ namespace AATool.Saves
                 {
                     if (exception is SftpPathNotFoundException)
                     {
-                        //folder not found, so world name might be wrong. refresh it next time 
+                        //folder not found, so world name might be wrong. refresh it next time
                         LastError = new SftpPathNotFoundException($"Path not found: \"{remotePath}\".");
                         InvalidateWorld();
                         return false;
@@ -500,6 +509,195 @@ namespace AATool.Saves
             foreach (string file in Directory.GetFiles(directory))
                 files.Add(new FileInfo(file));
             return files;
+        }
+
+        // =====================================================================
+        // FTP support (plain FTP, not SFTP)
+        // =====================================================================
+
+        private static void SyncFtp()
+        {
+            Task.Run(() =>
+            {
+                FtpClient ftp = null;
+                bool success = false;
+                try
+                {
+                    LinuxMode = Config.Sftp.Linux;
+                    LastError = null;
+
+                    ftp = new FtpClient(Config.Sftp.Host, Config.Sftp.Username, Config.Sftp.Password, Config.Sftp.Port);
+                    ftp.Connect();
+
+                    if (!FtpTryDownloadServerProperties(ftp))
+                        return;
+                    if (!FtpTryGetWorldSaveTime(ftp, out DateTime latest))
+                        return;
+
+                    DateTime next = latest.Add(TimeSpan.FromSeconds(SaveInterval));
+                    double remaining = (next - DateTime.UtcNow).TotalSeconds;
+                    if (remaining > 0)
+                        RefreshTimer.SetAndStart(Math.Min(remaining, SaveInterval));
+
+                    if (latest != LastWorldSave)
+                    {
+                        if (!FtpTryDownloadProgress(ftp))
+                            return;
+
+                        LastWorldSave = latest;
+
+                        if (Server.TryGet(out Server server))
+                            server.SendNextRefresh();
+
+                        success = true;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    LastError = exception;
+                    RefreshTimer.SetAndStart(RetryInterval);
+                }
+                finally
+                {
+                    try { ftp?.Disconnect(); } catch { }
+                    try { ftp?.Dispose(); } catch { }
+
+                    if (RefreshTimer.IsExpired || (LastSyncFailed && LastError is not ArgumentException))
+                        RefreshTimer.SetAndStart(RetryInterval);
+                    SetState(SyncState.Ready);
+
+                    if (success)
+                    {
+                        Tracker.FileSystemChanged(null, null);
+                        Tracker.Invalidate();
+                    }
+                }
+            });
+        }
+
+        private static bool FtpTryDownloadServerProperties(FtpClient ftp)
+        {
+            if (!string.IsNullOrEmpty(WorldName))
+                return true;
+
+            SetState(SyncState.ServerProperties);
+            try
+            {
+                string remotePath = HostAwarePath(Config.Sftp.ServerRoot, "server.properties");
+                string localTemp = Path.GetTempFileName();
+                ftp.DownloadFile(localTemp, remotePath);
+                string[] properties = File.ReadAllText(localTemp).Split('\n');
+                File.Delete(localTemp);
+
+                if (TryGetProperty(properties, "level-name", out string world))
+                    WorldName = world.TrimEnd();
+                if (TryGetProperty(properties, "motd", out string message))
+                    MessageOfTheDay = message.TrimEnd();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                LastError = exception;
+                return false;
+            }
+        }
+
+        private static bool FtpTryGetWorldSaveTime(FtpClient ftp, out DateTime lastWorldSave, int failures = 0)
+        {
+            SetState(SyncState.LastAutoSave);
+            string remotePath = HostAwarePath(Config.Sftp.ServerRoot, WorldName, "level.dat");
+            lastWorldSave = default;
+            try
+            {
+                lastWorldSave = ftp.GetModifiedTime(remotePath).ToUniversalTime();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                if (failures < MaximumRetries)
+                {
+                    Thread.Sleep(AttemptIntervalMs);
+                    return FtpTryGetWorldSaveTime(ftp, out lastWorldSave, failures + 1);
+                }
+                LastError = exception;
+                return false;
+            }
+        }
+
+        private static bool FtpTryDownloadProgress(FtpClient ftp)
+        {
+            //MC 26.1+ moved player data into a "players" subdirectory
+            bool useNewLayout = false;
+            try
+            {
+                string playersPath = HostAwarePath(Config.Sftp.ServerRoot, WorldName, "players");
+                useNewLayout = ftp.DirectoryExists(playersPath);
+            }
+            catch { }
+
+            string advFolder = useNewLayout ? "players/advancements" : "advancements";
+            string statsFolder = useNewLayout ? "players/stats" : "stats";
+
+            SetState(SyncState.Advancements);
+            if (!FtpTryDownloadFolder(ftp, advFolder))
+                return false;
+
+            SetState(SyncState.Statistics);
+            return FtpTryDownloadFolder(ftp, statsFolder);
+        }
+
+        private static bool FtpTryDownloadFolder(FtpClient ftp, string name, int failures = 0)
+        {
+            CurrentDownloadPercent = 0;
+            SmoothDownloadPercent = 0;
+
+            string localPath = Path.Combine(Paths.System.SftpWorldsFolder, WorldName, name);
+            string remotePath = HostAwarePath(Config.Sftp.ServerRoot, WorldName, name);
+            try
+            {
+                Directory.CreateDirectory(localPath);
+
+                FtpListItem[] remoteFiles = ftp.GetListing(remotePath);
+                IList<FileInfo> localFiles = GetFiles(localPath);
+
+                //delete local files no longer on server
+                foreach (FileInfo localFile in localFiles)
+                {
+                    bool found = false;
+                    foreach (FtpListItem remote in remoteFiles)
+                    {
+                        if (remote.Name == localFile.Name) { found = true; break; }
+                    }
+                    if (!found)
+                    {
+                        try { localFile.Delete(); } catch { }
+                    }
+                }
+
+                //download all remote files
+                int counter = 1;
+                foreach (FtpListItem remoteFile in remoteFiles)
+                {
+                    CurrentDownloadPercent = (int)(100 * ((double)counter / remoteFiles.Length));
+                    counter++;
+                    if (remoteFile.Type != FtpObjectType.File)
+                        continue;
+
+                    string localFile = Path.Combine(localPath, remoteFile.Name);
+                    ftp.DownloadFile(localFile, remoteFile.FullName);
+                }
+                return true;
+            }
+            catch (Exception exception)
+            {
+                if (failures < MaximumRetries)
+                {
+                    Thread.Sleep(AttemptIntervalMs);
+                    return FtpTryDownloadFolder(ftp, name, failures + 1);
+                }
+                LastError = exception;
+                return false;
+            }
         }
     }
 }
