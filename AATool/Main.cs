@@ -218,34 +218,8 @@ namespace AATool
                 PrimaryScreen.Render();
                 PrimaryScreen.Present();
                 base.Draw(gameTime);
-
-                //debug screenshot trigger
-                TrySaveDebugScreenshot();
             }
             Debug.EndTiming("draw_main");
-        }
-
-        private void TrySaveDebugScreenshot()
-        {
-            string flagPath = Path.Combine(Environment.CurrentDirectory, "debug_screenshot.flag");
-            if (!File.Exists(flagPath))
-                return;
-            try
-            {
-                File.Delete(flagPath);
-                int w = Device.PresentationParameters.BackBufferWidth;
-                int h = Device.PresentationParameters.BackBufferHeight;
-                var data = new Color[w * h];
-                Device.GetBackBufferData(data);
-                using (var tex = new Texture2D(Device, w, h))
-                {
-                    tex.SetData(data);
-                    string outPath = Path.Combine(Environment.CurrentDirectory, "debug_screenshot.png");
-                    using (var stream = File.Create(outPath))
-                        tex.SaveAsPng(stream, w, h);
-                }
-            }
-            catch { }
         }
 
         private void AddScreen(UIScreen screen)
