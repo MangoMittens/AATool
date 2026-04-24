@@ -378,7 +378,7 @@ namespace AATool.Winforms.Controls
             // labelProtocol
             //
             this.labelProtocol.AutoSize = true;
-            this.labelProtocol.Location = new System.Drawing.Point(280, 113);
+            this.labelProtocol.Location = new System.Drawing.Point(308, 113);
             this.labelProtocol.Margin = new System.Windows.Forms.Padding(3, 6, 3, 0);
             this.labelProtocol.Name = "labelProtocol";
             this.labelProtocol.Size = new System.Drawing.Size(52, 13);
@@ -392,7 +392,7 @@ namespace AATool.Winforms.Controls
             this.sftpProtocol.Items.AddRange(new object[] {
             "SFTP",
             "FTP"});
-            this.sftpProtocol.Location = new System.Drawing.Point(283, 129);
+            this.sftpProtocol.Location = new System.Drawing.Point(308, 129);
             this.sftpProtocol.Name = "sftpProtocol";
             this.sftpProtocol.Size = new System.Drawing.Size(96, 21);
             this.sftpProtocol.TabIndex = 76;
