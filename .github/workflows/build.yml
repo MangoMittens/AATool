@@ -28,4 +28,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AATool-26.1
-        path: AATool/bin/Release/
+        path: AATool/AATool/bin/Release/
