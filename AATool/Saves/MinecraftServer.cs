@@ -539,18 +539,16 @@ namespace AATool.Saves
                     if (remaining > 0)
                         RefreshTimer.SetAndStart(Math.Min(remaining, SaveInterval));
 
-                    if (latest != LastWorldSave)
-                    {
-                        if (!FtpTryDownloadProgress(ftp))
-                            return;
+                    //always re-download over FTP (timestamp comparison unreliable)
+                    if (!FtpTryDownloadProgress(ftp))
+                        return;
 
-                        LastWorldSave = latest;
+                    LastWorldSave = latest;
 
-                        if (Server.TryGet(out Server server))
-                            server.SendNextRefresh();
+                    if (Server.TryGet(out Server server))
+                        server.SendNextRefresh();
 
-                        success = true;
-                    }
+                    success = true;
                 }
                 catch (Exception exception)
                 {
