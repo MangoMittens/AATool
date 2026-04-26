@@ -568,11 +568,35 @@ namespace AATool.Saves
 
                     if (success)
                     {
+                        //touch downloaded files so timestamp-based change detection picks them up
+                        FtpTouchDownloadedFiles();
                         Tracker.FileSystemChanged(null, null);
                         Tracker.Invalidate();
                     }
                 }
             });
+        }
+
+        private static void FtpTouchDownloadedFiles()
+        {
+            try
+            {
+                string worldDir = Path.Combine(Paths.System.SftpWorldsFolder, WorldName);
+                string[] searchDirs = {
+                    Path.Combine(worldDir, "players", "advancements"),
+                    Path.Combine(worldDir, "players", "stats"),
+                    Path.Combine(worldDir, "advancements"),
+                    Path.Combine(worldDir, "stats"),
+                };
+                DateTime now = DateTime.Now;
+                foreach (string dir in searchDirs)
+                {
+                    if (!Directory.Exists(dir)) continue;
+                    foreach (string file in Directory.GetFiles(dir, "*.json"))
+                        File.SetLastWriteTime(file, now);
+                }
+            }
+            catch { }
         }
 
         private static bool FtpTryDownloadServerProperties(FtpClient ftp)
